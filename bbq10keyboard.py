@@ -167,6 +167,7 @@ class DigitalInOut:
 
 class BBQ10Keyboard:
     def __init__(self, i2c):
+        self._i2cdelay = 0.01
         self._i2c = I2CDevice(i2c, _ADDRESS_KBD)
         self._buffer = bytearray(2)
 
@@ -175,6 +176,7 @@ class BBQ10Keyboard:
     def reset(self):
         with self._i2c as i2c:
             self._buffer[0] = _REG_RST
+            time.sleep(self._i2cdelay)
             i2c.write(self._buffer, end=1)
 
         # need to wait!
@@ -200,7 +202,9 @@ class BBQ10Keyboard:
 
         with self._i2c as i2c:
             self._buffer[0] = _REG_FIF
+            time.sleep(self._i2cdelay)
             i2c.write(self._buffer, end=1)
+            time.sleep(self._i2cdelay)
             i2c.readinto(self._buffer, end=2)
 
         return (int(self._buffer[0]), chr(self._buffer[1]))
@@ -253,7 +257,9 @@ class BBQ10Keyboard:
     def _read_register(self, reg):
         with self._i2c as i2c:
             self._buffer[0] = reg
+            time.sleep(self._i2cdelay)
             i2c.write(self._buffer, end=1)
+            time.sleep(self._i2cdelay)
             i2c.readinto(self._buffer, end=1)
 
         return self._buffer[0]
@@ -262,6 +268,7 @@ class BBQ10Keyboard:
         with self._i2c as i2c:
             self._buffer[0] = reg | _WRITE_MASK
             self._buffer[1] = value
+            time.sleep(self._i2cdelay)
             i2c.write(self._buffer, end=2)
 
     def _update_register_bit(self, reg, bit, value):
